@@ -167,7 +167,7 @@
         /* Kontainer Kartu Tarot */
         .tarot-container {
             perspective: 1500px;
-            height: 480px;
+            height: 500px;
             display: none; /* Awalnya disembunyikan */
         }
         
@@ -235,6 +235,10 @@
         
         <!-- Form Input -->
         <form id="zodiac-form" class="space-y-4">
+             <div>
+                <label for="name" class="block text-sm font-medium text-gray-400 mb-1">Nama Panggilanmu</label>
+                <input type="text" id="name" name="name" class="form-input w-full p-3 rounded-lg text-sm" placeholder="e.g. Bintang" autocomplete="off">
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="custom-select-wrapper" id="day-wrapper">
                     <label class="block text-sm font-medium text-gray-400 mb-1">Tanggal</label>
@@ -411,7 +415,7 @@
              // Set default value for trigger
             trigger.querySelector('span').textContent = data[0].text;
             selectEl.value = data[0].value;
-
+            optionsContainer.querySelector('.custom-option').classList.add('selected');
         }
 
         // Mengisi Opsi Dropdown
@@ -468,12 +472,17 @@
             e.preventDefault();
             hideError();
 
+            const name = document.getElementById('name').value.trim();
             const day = parseInt(document.getElementById('day').value);
             const month = parseInt(document.getElementById('month').value);
             const year = parseInt(document.getElementById('year').value);
             
+            if(!name) {
+                showError("Silakan masukkan namamu untuk membuka takdir.");
+                return;
+            }
+
             const birthDate = new Date(year, month - 1, day);
-             // Validasi tanggal (contoh: 31 Feb tidak valid)
             if (birthDate.getFullYear() !== year || birthDate.getMonth() + 1 !== month || birthDate.getDate() !== day) {
                 showError("Tanggal lahir tidak valid.");
                 return;
@@ -501,7 +510,7 @@
 
             setTimeout(() => {
                 const zodiac = getZodiac(day, month);
-                displayResult(zodiac, age);
+                displayResult(zodiac, age, name);
                 cardInner.classList.add('is-flipped');
             }, 2000);
         }
@@ -521,11 +530,15 @@
             return 'capricorn';
         }
 
-        function displayResult(zodiacKey, age) {
+        function displayResult(zodiacKey, age, name) {
             const data = zodiacData[zodiacKey];
             const resultContent = document.getElementById('result-content');
 
             resultContent.innerHTML = `
+                <div class="text-center">
+                    <h3 class="text-lg text-purple-200">Hai, <span class="font-bold">${name}</span>!</h3>
+                    <p class="text-xs text-gray-400 mb-3">Takdir bintangmu telah terungkap:</p>
+                </div>
                 <div class="zodiac-symbol text-6xl text-purple-300" style="filter: drop-shadow(0 0 10px #a855f7);">${data.symbol}</div>
                 <h2 class="title text-2xl mt-2">${data.name}</h2>
                 <p class="text-xs text-gray-400 font-medium tracking-widest">${data.character}</p>
