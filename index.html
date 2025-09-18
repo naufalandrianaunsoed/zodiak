@@ -142,6 +142,22 @@
         .custom-options::-webkit-scrollbar { width: 6px; }
         .custom-options::-webkit-scrollbar-track { background: transparent; }
         .custom-options::-webkit-scrollbar-thumb { background: #a855f7; border-radius: 3px; }
+        
+        /* Search Input in Dropdown */
+        .search-input {
+            padding: 0.6rem 0.75rem;
+            background-color: #030014;
+            border: none;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            margin: 0;
+            width: 100%;
+            color: #e0e0e0;
+            font-size: 0.875rem;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
 
 
         /* Tombol dengan Efek Pulsating Glow */
@@ -259,6 +275,11 @@
             <button type="submit" class="glow-button w-full py-3 rounded-lg font-bold text-white mt-4">
                 Buka Takdirmu
             </button>
+            <div class="text-center pt-4">
+                <a href="https://www.instagram.com/opaanng/" target="_blank" rel="noopener noreferrer" class="text-xs text-purple-400/60 hover:text-purple-300 underline underline-offset-2 transition-colors">
+                    Powered by naufalandriana
+                </a>
+            </div>
         </form>
     </div>
 
@@ -358,67 +379,97 @@
             createStars();
         });
         
-        // Logika Dropdown Kustom
+        // Logika Dropdown Kustom dengan Pencarian
         function setupCustomSelect(wrapperId, placeholder) {
             const wrapper = document.getElementById(wrapperId);
             const selectEl = wrapper.querySelector('select');
-
             const customSelect = document.createElement('div');
             customSelect.className = 'custom-select';
-            
             const trigger = document.createElement('div');
             trigger.className = 'custom-select-trigger';
             trigger.innerHTML = `<span>${placeholder}</span><div class="arrow"></div>`;
-            
             const options = document.createElement('div');
             options.className = 'custom-options';
             
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'search-input';
+            searchInput.placeholder = 'Ketik untuk mencari...';
+            searchInput.autocomplete = 'off';
+            searchInput.addEventListener('click', e => e.stopPropagation());
+            options.appendChild(searchInput);
+
+            searchInput.addEventListener('input', () => {
+                const filter = searchInput.value.toLowerCase();
+                const customOptions = options.querySelectorAll('.custom-option');
+                customOptions.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.startsWith(filter)) {
+                        option.style.display = '';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const firstVisibleOption = options.querySelector(".custom-option:not([style*='display: none'])");
+                    if (firstVisibleOption) {
+                        firstVisibleOption.click();
+                    }
+                }
+            });
+
             customSelect.appendChild(trigger);
             customSelect.appendChild(options);
             wrapper.appendChild(customSelect);
 
             trigger.addEventListener('click', () => {
-                customSelect.classList.toggle('open');
+                const isOpen = customSelect.classList.toggle('open');
+                if (isOpen) {
+                    setTimeout(() => searchInput.focus(), 50);
+                }
             });
-            
+
             return { selectEl, options, trigger };
         }
 
         function populateCustomSelect(selectEl, optionsContainer, trigger, data) {
             data.forEach(item => {
-                // Populate original select
                 const originalOption = document.createElement('option');
                 originalOption.value = item.value;
                 originalOption.textContent = item.text;
                 selectEl.appendChild(originalOption);
-                
-                // Populate custom select
+
                 const customOption = document.createElement('div');
                 customOption.className = 'custom-option';
                 customOption.dataset.value = item.value;
                 customOption.textContent = item.text;
-                
+
                 customOption.addEventListener('click', () => {
-                    // Update trigger text
                     trigger.querySelector('span').textContent = customOption.textContent;
-                    // Update original select value
                     selectEl.value = customOption.dataset.value;
-                    // Close dropdown
-                    trigger.parentElement.classList.remove('open');
-                    // Remove selection from others
-                    optionsContainer.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
-                    // Mark as selected
+                    const customSelect = trigger.closest('.custom-select');
+                    customSelect.classList.remove('open');
+                    
+                    const searchInput = optionsContainer.querySelector('.search-input');
+                    searchInput.value = '';
+                    optionsContainer.querySelectorAll('.custom-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                        opt.style.display = '';
+                    });
+                    
                     customOption.classList.add('selected');
                 });
                 optionsContainer.appendChild(customOption);
             });
-             // Set default value for trigger
             trigger.querySelector('span').textContent = data[0].text;
             selectEl.value = data[0].value;
             optionsContainer.querySelector('.custom-option').classList.add('selected');
         }
 
-        // Mengisi Opsi Dropdown
         function populateSelectors() {
             const dayData = Array.from({ length: 31 }, (_, i) => ({ value: i + 1, text: i + 1 }));
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -436,7 +487,6 @@
             populateCustomSelect(yearSelect.selectEl, yearSelect.options, yearSelect.trigger, yearData);
         }
 
-        // Logika Utama
         document.addEventListener('DOMContentLoaded', () => {
             setCanvasSize();
             createStars();
@@ -447,9 +497,17 @@
             form.addEventListener('submit', handleFormSubmit);
 
             window.addEventListener('click', (e) => {
-                document.querySelectorAll('.custom-select').forEach(select => {
+                document.querySelectorAll('.custom-select.open').forEach(select => {
                     if (!select.contains(e.target)) {
                         select.classList.remove('open');
+                        const searchInput = select.querySelector('.search-input');
+                        const optionsContainer = select.querySelector('.custom-options');
+                        if(searchInput) searchInput.value = '';
+                        if(optionsContainer) {
+                             optionsContainer.querySelectorAll('.custom-option').forEach(opt => {
+                                opt.style.display = '';
+                            });
+                        }
                     }
                 });
             });
@@ -546,8 +604,8 @@
                 <p class="text-sm italic text-gray-300">"${data.prophecy}"</p>
                 <div class="mt-4 pt-4 border-t border-purple-500/20 w-full flex justify-between items-center text-xs text-gray-400">
                     <span>Elemen: ${data.element}</span>
-                    <button onclick="resetView()" class="px-3 py-1 bg-purple-900/50 rounded-full hover:bg-purple-800/70 transition-colors">Coba Lagi</button>
                     <span>Usia: ${age}</span>
+                    <button onclick="resetView()" class="px-3 py-1 bg-purple-900/50 rounded-full hover:bg-purple-800/70 transition-colors">Coba Lagi</button>
                 </div>
             `;
         }
