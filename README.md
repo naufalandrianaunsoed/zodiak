@@ -1,5 +1,7 @@
 # Tugas Aplikasi Web - Pengecek Zodiak "Gerbang Astral"
 
+# https://cekzodiak.netlify.app/
+
 Ini adalah proyek tugas untuk membuat aplikasi web interaktif yang berfungsi sebagai pengecek zodiak berdasarkan tanggal lahir pengguna. Aplikasi ini dirancang dengan estetika modern dan mistis untuk memberikan pengalaman yang lebih dari sekadar form input biasa.
 
 ## ✨ Fitur Unggulan
@@ -21,3 +23,4 @@ Ini adalah proyek tugas untuk membuat aplikasi web interaktif yang berfungsi seb
 ## 🚀 Cara Menjalankan
 
 Karena ini adalah proyek mandiri dalam satu file, Anda tidak perlu melakukan instalasi apa pun. Cukup unduh file `index.html` dari repositori ini dan buka langsung di browser web apa pun (seperti Chrome, Firefox, atau Safari).
+
